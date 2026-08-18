@@ -1,5 +1,10 @@
 import type { Vulnerability } from '../../mockVulnerabilities';
 
+function csvField(value: unknown): string {
+  const str = String(value ?? '');
+  return /[",\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
+}
+
 export function exportToCsv(vulnerabilities: Vulnerability[], filename: string): void {
   const headers = [
     'Vulnerability ID',
@@ -20,24 +25,26 @@ export function exportToCsv(vulnerabilities: Vulnerability[], filename: string):
     'Duplicate',
   ];
 
-  const rows = vulnerabilities.map((v) => [
-    v.vulnerabilityId,
-    v.componentName,
-    v.componentVersion,
-    `"${v.title.replace(/"/g, '""')}"`,
-    v.cwe,
-    v.severity,
-    v.cvss.toString(),
-    v.cvssVector || '',
-    v.stage,
-    v.complexity,
-    v.ageDays.toString(),
-    v.exploitTested ? 'Yes' : 'No',
-    v.reproducerIncluded ? 'Yes' : 'No',
-    v.customerPriority || '',
-    v.embargo ? 'Yes' : 'No',
-    v.duplicate ? `Yes (${v.duplicateOf || ''})` : 'No',
-  ]);
+  const rows = vulnerabilities.map((v) =>
+    [
+      v.vulnerabilityId,
+      v.componentName,
+      v.componentVersion,
+      v.title,
+      v.cwe,
+      v.severity,
+      v.cvss.toString(),
+      v.cvssVector || '',
+      v.stage,
+      v.complexity,
+      v.ageDays.toString(),
+      v.exploitTested ? 'Yes' : 'No',
+      v.reproducerIncluded ? 'Yes' : 'No',
+      v.customerPriority || '',
+      v.embargo ? 'Yes' : 'No',
+      v.duplicate ? `Yes (${v.duplicateOf || ''})` : 'No',
+    ].map(csvField),
+  );
 
   const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
 
@@ -61,6 +68,15 @@ export function exportToJson(vulnerabilities: Vulnerability[], filename: string)
   URL.revokeObjectURL(url);
 }
 
+function escapeHtml(value: unknown): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export function exportToPdf(vulnerabilities: Vulnerability[], title: string): void {
   const stageGroups = new Map<string, number>();
   const severityGroups = new Map<string, number>();
@@ -75,7 +91,7 @@ export function exportToPdf(vulnerabilities: Vulnerability[], title: string): vo
   const stuckCount = vulnerabilities.filter((v) => v.ageDays > 30).length;
 
   let html = `
-    <html><head><title>${title}</title>
+    <html><head><title>${escapeHtml(title)}</title>
     <style>
       body { font-family: 'Red Hat Text', sans-serif; padding: 40px; color: #151515; }
       h1 { color: #EE0000; }
@@ -88,8 +104,8 @@ export function exportToPdf(vulnerabilities: Vulnerability[], title: string): vo
       .stat-value { font-size: 28px; font-weight: bold; }
       .stat-label { font-size: 12px; color: #6A6E73; }
     </style></head><body>
-    <h1>${title}</h1>
-    <p>Generated: ${new Date().toLocaleDateString()}</p>
+    <h1>${escapeHtml(title)}</h1>
+    <p>Generated: ${escapeHtml(new Date().toLocaleDateString())}</p>
     <div class="summary">
       <div class="stat"><div class="stat-value">${vulnerabilities.length}</div><div class="stat-label">Total Vulnerabilities</div></div>
       <div class="stat"><div class="stat-value">${avgAge}d</div><div class="stat-label">Avg Age</div></div>
@@ -98,20 +114,20 @@ export function exportToPdf(vulnerabilities: Vulnerability[], title: string): vo
     <h2>By Stage</h2><table><tr><th>Stage</th><th>Count</th></tr>`;
 
   for (const [stage, count] of stageGroups) {
-    html += `<tr><td>${stage}</td><td>${count}</td></tr>`;
+    html += `<tr><td>${escapeHtml(stage)}</td><td>${count}</td></tr>`;
   }
 
   html += `</table><h2>By Severity</h2><table><tr><th>Severity</th><th>Count</th></tr>`;
 
   for (const [sev, count] of severityGroups) {
-    html += `<tr><td>${sev}</td><td>${count}</td></tr>`;
+    html += `<tr><td>${escapeHtml(sev)}</td><td>${count}</td></tr>`;
   }
 
   html += `</table><h2>All Vulnerabilities</h2><table>
     <tr><th>ID</th><th>Component</th><th>Severity</th><th>Stage</th><th>Age</th><th>Complexity</th></tr>`;
 
   for (const v of vulnerabilities) {
-    html += `<tr><td>${v.vulnerabilityId}</td><td>${v.componentName} ${v.componentVersion}</td><td>${v.severity}</td><td>${v.stage}</td><td>${v.ageDays}d</td><td>${v.complexity}</td></tr>`;
+    html += `<tr><td>${escapeHtml(v.vulnerabilityId)}</td><td>${escapeHtml(v.componentName)} ${escapeHtml(v.componentVersion)}</td><td>${escapeHtml(v.severity)}</td><td>${escapeHtml(v.stage)}</td><td>${v.ageDays}d</td><td>${escapeHtml(v.complexity)}</td></tr>`;
   }
 
   html += `</table></body></html>`;

@@ -93,7 +93,7 @@ const Beacon = () => {
     for (const v of newVulns) stageCount[v.stage]++;
 
     const newBatch: Batch = {
-      id: `batch-${Date.now()}`,
+      id: newVulns[0]?.batchId ?? `batch-${Date.now()}`,
       name,
       createdDate: new Date().toISOString().split('T')[0],
       vulnerabilityCount: newVulns.length,

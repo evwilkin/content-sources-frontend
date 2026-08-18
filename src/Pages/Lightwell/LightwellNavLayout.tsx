@@ -50,7 +50,12 @@ export default function LightwellNavLayout() {
           <Nav aria-label='Horizontal subnav' variant='horizontal-subnav'>
             <NavList>
               {NAV_ITEMS.map(({ key, title, destination }) => (
-                <NavItem key={key} itemId={key} isActive={activeKey === key} ouiaId={`lightwell-nav-${key}`}>
+                <NavItem
+                  key={key}
+                  itemId={key}
+                  isActive={activeKey === key}
+                  ouiaId={`lightwell-nav-${key}`}
+                >
                   <Link to={lightwellNavigationPaths[destination]({ rootPath })}>{title}</Link>
                 </NavItem>
               ))}

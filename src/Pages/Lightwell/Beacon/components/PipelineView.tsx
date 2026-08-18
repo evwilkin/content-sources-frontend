@@ -28,11 +28,7 @@ export function PipelineView({
           <FlexItem key={stat.stage} flex={{ default: 'flex_1' }}>
             <Flex alignItems={{ default: 'alignItemsCenter' }} gap={{ default: 'gapNone' }}>
               <FlexItem flex={{ default: 'flex_1' }}>
-                <StageCard
-                  stage={stat.stage}
-                  count={stat.count}
-                  stuckCount={stat.stuckCount}
-                />
+                <StageCard stage={stat.stage} count={stat.count} stuckCount={stat.stuckCount} />
               </FlexItem>
               {idx < stageStats.length - 1 && (
                 <FlexItem className='lightwell-pipeline-arrow'>&#9654;</FlexItem>

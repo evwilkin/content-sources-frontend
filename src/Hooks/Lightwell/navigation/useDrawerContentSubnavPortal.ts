@@ -1,9 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 
-import {
-  findPageMainContainer,
-  insertSubnavPortalContainer,
-} from './subnavPortalInsertion';
+import { findPageMainContainer, insertSubnavPortalContainer } from './subnavPortalInsertion';
 
 // Insights Chrome renders its own Page/Drawer shell around this app, and there is no
 // supported Chrome API for a federated module to inject content as a peer of

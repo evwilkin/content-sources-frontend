@@ -62,9 +62,7 @@ function topLevelDescendant(ancestor: HTMLElement, descendant: HTMLElement): HTM
   return target;
 }
 
-export function insertSubnavPortalContainer(
-  mainContainer: HTMLElement,
-): HTMLDivElement | null {
+export function insertSubnavPortalContainer(mainContainer: HTMLElement): HTMLDivElement | null {
   const insertion = findSubnavPortalInsertionPoint(mainContainer);
   if (!insertion) {
     return null;

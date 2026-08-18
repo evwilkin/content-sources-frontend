@@ -1,11 +1,7 @@
 import { appendSearchParams, type LightwellPackagesParams } from '../lightwellPackagesParams';
 
 export type LightwellDestinationKey =
-  | 'repositories'
-  | 'repositoryPackages'
-  | 'packageDetails'
-  | 'lens'
-  | 'beacon';
+  'repositories' | 'repositoryPackages' | 'packageDetails' | 'lens' | 'beacon';
 
 export type LightwellNavigationParams = {
   rootPath: string;
