@@ -103,6 +103,16 @@
   line-height: 1.2;
 }
 
+.lightwell-status-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.lightwell-status-cell-reason {
+  white-space: normal;
+}
+
 /* Summary stats — UNUSED (old summary chrome → LwMetricsCount). Dissolution sweep.
  * See scaffold-outline/examples/dissolution-map.md */
 .lightwell-stat-number {

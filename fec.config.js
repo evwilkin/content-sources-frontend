@@ -197,12 +197,6 @@ module.exports = {
     modules: [srcDir, path.resolve(__dirname, './node_modules')],
   },
   routes: {
-    // Local chrome on :9997 only when `scripts/serve-chrome-dist.mjs` is running.
-    // Commented out so fec-chrome-local (:9998 via yarn start:stage) serves chrome.
-    // '/apps/chrome': {
-    //   host: 'http://127.0.0.1:9997',
-    //   is_chrome: true,
-    // },
     ...(process.env.BACKEND_PORT && {
       '/api/content-sources/': {
         host: `http://127.0.0.1:${process.env.BACKEND_PORT}`,

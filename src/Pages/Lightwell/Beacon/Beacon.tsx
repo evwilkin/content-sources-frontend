@@ -45,7 +45,15 @@ import {
 import { LwButton, LwEmptyState, LwMenu, LwPopover, LwSkeleton } from 'kit/components/primitives';
 
 import type { LwStepIconColorKey } from 'kit/lightwell.config';
-import { SEVERITIES, STATUS_DESCRIPTIONS, STATUSES } from './constants';
+import {
+  FILTER_STATUSES,
+  NO_REMEDIATION_LABEL,
+  SEVERITIES,
+  STATUS_DESCRIPTIONS,
+  STATUSES,
+  statusLabel,
+  UNREMEDIATED_STATUS,
+} from './constants';
 import type { Severity, Status } from './types';
 import { ExportMenu } from './components/ExportMenu';
 import { VulnerabilityTable } from './components/VulnerabilityTable';
@@ -252,7 +260,7 @@ const Beacon = () => {
 
   // Beacon owns domain → stepIcon mapping; kit stepper stays product-agnostic.
   const isPipelineHydrated = Boolean(selectedCustomerId && !isLoading);
-  const pipelineStepIcons: Record<Status, ReactNode> = {
+  const pipelineStepIcons: Record<Exclude<Status, 'Unremediated'>, ReactNode> = {
     Submitted: <RhUiPendingIcon />,
     Classified: <CheckCircleIcon />,
     'Fix in Progress': <RhUiInProgressIcon />,
@@ -407,6 +415,14 @@ const Beacon = () => {
                         <LwSkeleton fontSize='3xl' width='4ch' />
                         <LwSkeleton fontSize='sm' width='5ch' />
                       </Flex>
+                      <Flex
+                        direction={{ default: 'column' }}
+                        gap={{ default: 'gapSm' }}
+                        alignItems={{ default: 'alignItemsCenter' }}
+                      >
+                        <LwSkeleton fontSize='3xl' width='4ch' />
+                        <LwSkeleton fontSize='sm' width='5ch' />
+                      </Flex>
                     </Flex>
                   }
                 >
@@ -422,6 +438,10 @@ const Beacon = () => {
                       value={displayMeta?.criticalCount ?? 0}
                       label='Critical'
                       color='red'
+                    />
+                    <LwMetricsCount
+                      value={displayMeta?.statusCounts?.[UNREMEDIATED_STATUS] ?? 0}
+                      label={NO_REMEDIATION_LABEL}
                     />
                   </Flex>
                 </LwLoaded>
@@ -497,13 +517,13 @@ const Beacon = () => {
                     showAll={!!showAllCategories.pipeline}
                     onShowAllToggle={() => toggleShowAllCategory('pipeline')}
                   >
-                    {STATUSES.map((status) => (
+                    {FILTER_STATUSES.map((status) => (
                       <FilterSidePanelCategoryItem
                         key={status}
                         checked={selectedStatuses.has(status)}
                         onClick={() => toggleStatus(status)}
                       >
-                        {status}
+                        {statusLabel(status)}
                       </FilterSidePanelCategoryItem>
                     ))}
                   </FilterSidePanelCategory>
