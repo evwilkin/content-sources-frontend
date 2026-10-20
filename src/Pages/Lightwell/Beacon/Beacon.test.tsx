@@ -198,6 +198,33 @@ it('clears the ticket filter when the customer changes and keeps other filters',
   ).toBe(true);
 });
 
+it('shows a reset-filters control next to the active count and clears all filters on click', async () => {
+  renderBeacon();
+  const user = await selectCustomer('CID-01');
+
+  const filterPanel = await waitFor(() => {
+    const panel = document.querySelector('.lightwell-filter-panel');
+    expect(panel).not.toBeNull();
+    return panel as HTMLElement;
+  });
+
+  expect(screen.queryByRole('button', { name: 'Reset filters' })).not.toBeInTheDocument();
+
+  await user.click(within(filterPanel).getByText('Critical'));
+  await user.click(within(filterPanel).getByText('batch-1'));
+
+  expect(within(filterPanel).getByText('2 active')).toBeInTheDocument();
+  const resetButton = screen.getByRole('button', { name: 'Reset filters' });
+  expect(resetButton).toBeInTheDocument();
+
+  await user.click(resetButton);
+
+  expect(within(filterPanel).queryByText(/active$/)).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Reset filters' })).not.toBeInTheDocument();
+  expect(within(filterPanel).getByRole('checkbox', { name: /critical/i })).not.toBeChecked();
+  expect(within(filterPanel).getByRole('checkbox', { name: /batch-1/i })).not.toBeChecked();
+});
+
 it('keeps the status summary card header while metrics are loading', async () => {
   (useCustomerIdsQuery as jest.Mock).mockReturnValue({
     isLoading: false,

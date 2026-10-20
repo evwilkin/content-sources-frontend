@@ -485,9 +485,19 @@ const Beacon = () => {
                     Filters
                   </Title>
                   {activeFilterCount > 0 && (
-                    <Content component='small' className='lightwell-filter-count'>
-                      {activeFilterCount} active
-                    </Content>
+                    <span className='lightwell-filter-panel-header-actions'>
+                      <Content component='small' className='lightwell-filter-count'>
+                        {activeFilterCount} active
+                      </Content>
+                      <LwButton
+                        variant='link'
+                        isInline
+                        ouiaId='beacon-filter-panel-reset'
+                        onClick={resetFilters}
+                      >
+                        Reset filters
+                      </LwButton>
+                    </span>
                   )}
                 </span>
                 <FilterSidePanel id='beacon-filter-panel'>
