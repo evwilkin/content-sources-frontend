@@ -252,3 +252,58 @@ it('keeps the status summary card header while metrics are loading', async () =>
   expect(screen.getByText('Customer ID')).toBeInTheDocument();
   expect(screen.getByText('Filters')).toBeInTheDocument();
 });
+
+it('hides the filter panel and toolbar when the customer has no submissions at all', async () => {
+  (useBeaconData as jest.Mock).mockReturnValue({
+    isLoading: false,
+    isError: false,
+    error: null,
+    data: {
+      vulnerabilities: [],
+      meta: { count: 0, criticalCount: 0, statusCounts: {} },
+    },
+  });
+  (useLtwlsuptTicketIdsQuery as jest.Mock).mockReturnValue({
+    isLoading: false,
+    data: [],
+  });
+
+  renderBeacon();
+  await selectCustomer('CID-01');
+
+  expect(document.querySelector('.lightwell-filter-panel')).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole('textbox', { name: 'Filter vulnerabilities by ID, package, or title' }),
+  ).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Manage columns' })).not.toBeInTheDocument();
+  expect(screen.getByText('No submissions yet')).toBeInTheDocument();
+  expect(screen.queryByText('No results match the current filters')).not.toBeInTheDocument();
+});
+
+it('keeps the filter panel when filters narrow results down to zero', async () => {
+  // Mirrors the real API: an unfiltered query returns this customer's actual
+  // data, but applying filters can legitimately narrow that down to zero.
+  (useBeaconData as jest.Mock).mockImplementation((_customerId, filters) => ({
+    isLoading: false,
+    isError: false,
+    error: null,
+    data: filters
+      ? { vulnerabilities: [], meta: { count: 0, criticalCount: 0, statusCounts: {} } }
+      : mockBeaconData,
+  }));
+
+  renderBeacon();
+  const user = await selectCustomer('CID-01');
+
+  const filterPanel = await waitFor(() => {
+    const panel = document.querySelector('.lightwell-filter-panel');
+    expect(panel).not.toBeNull();
+    return panel as HTMLElement;
+  });
+
+  await user.click(within(filterPanel).getByText('Critical'));
+
+  expect(document.querySelector('.lightwell-filter-panel')).toBeInTheDocument();
+  expect(screen.getByText('No results match the current filters')).toBeInTheDocument();
+  expect(screen.queryByText('No submissions yet')).not.toBeInTheDocument();
+});

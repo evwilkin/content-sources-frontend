@@ -253,6 +253,13 @@ const Beacon = () => {
     selectedLtwlsuptTickets.size +
     (showDuplicates ? 1 : 0);
 
+  // `queryFilters` is undefined exactly when no filters/search are applied,
+  // so a zero count here means the customer has no data at all — not that
+  // filters excluded everything (LWLP-1869). Gate on `!isLoading` too so a
+  // customer with real data doesn't briefly read as empty before it loads.
+  const hasActiveFilters = queryFilters !== undefined;
+  const isTrueEmpty = !hasActiveFilters && !isLoading && (displayMeta?.count ?? 0) === 0;
+
   const onSetPage = (_event: unknown, newPage: number) => setPage(newPage);
   const onPerPageSelect = (_event: unknown, newPerPage: number, newPage: number) => {
     setPerPage(newPerPage);
@@ -479,88 +486,90 @@ const Beacon = () => {
               alignItems={{ default: 'alignItemsFlexStart' }}
               className='lightwell-beacon-layout'
             >
-              <FlexItem className='lightwell-filter-panel'>
-                <span className='lightwell-filter-panel-header'>
-                  <Title headingLevel='h4' size='md'>
-                    Filters
-                  </Title>
-                  {activeFilterCount > 0 && (
-                    <span className='lightwell-filter-panel-header-actions'>
-                      <Content component='small' className='lightwell-filter-count'>
-                        {activeFilterCount} active
-                      </Content>
-                      <LwButton
-                        variant='link'
-                        isInline
-                        ouiaId='beacon-filter-panel-reset'
-                        onClick={resetFilters}
-                      >
-                        Reset filters
-                      </LwButton>
-                    </span>
-                  )}
-                </span>
-                <FilterSidePanel id='beacon-filter-panel'>
-                  <FilterSidePanelCategory
-                    title='Severity'
-                    showAll={!!showAllCategories.severity}
-                    onShowAllToggle={() => toggleShowAllCategory('severity')}
-                  >
-                    {SEVERITIES.map((sev) => (
-                      <FilterSidePanelCategoryItem
-                        key={sev}
-                        checked={selectedSeverities.has(sev)}
-                        onClick={() => toggleSeverity(sev)}
-                      >
-                        {sev}
-                      </FilterSidePanelCategoryItem>
-                    ))}
-                  </FilterSidePanelCategory>
-
-                  <FilterSidePanelCategory
-                    title='Status'
-                    showAll={!!showAllCategories.pipeline}
-                    onShowAllToggle={() => toggleShowAllCategory('pipeline')}
-                  >
-                    {FILTER_STATUSES.map((status) => (
-                      <FilterSidePanelCategoryItem
-                        key={status}
-                        checked={selectedStatuses.has(status)}
-                        onClick={() => toggleStatus(status)}
-                      >
-                        {statusLabel(status)}
-                      </FilterSidePanelCategoryItem>
-                    ))}
-                  </FilterSidePanelCategory>
-
-                  {ltwlsuptTicketIds.length > 0 && (
-                    <FilterSidePanelCategory
-                      title='LTWLSUPT_TICKET'
-                      showAll={!!showAllCategories.ltwlsuptTicket}
-                      onShowAllToggle={() => toggleShowAllCategory('ltwlsuptTicket')}
-                    >
-                      {ltwlsuptTicketIds.map((ticketId) => (
-                        <FilterSidePanelCategoryItem
-                          key={ticketId}
-                          checked={selectedLtwlsuptTickets.has(ticketId)}
-                          onClick={() => toggleLtwlsuptTicket(ticketId)}
+              {!isTrueEmpty && (
+                <FlexItem className='lightwell-filter-panel'>
+                  <span className='lightwell-filter-panel-header'>
+                    <Title headingLevel='h4' size='md'>
+                      Filters
+                    </Title>
+                    {activeFilterCount > 0 && (
+                      <span className='lightwell-filter-panel-header-actions'>
+                        <Content component='small' className='lightwell-filter-count'>
+                          {activeFilterCount} active
+                        </Content>
+                        <LwButton
+                          variant='link'
+                          isInline
+                          ouiaId='beacon-filter-panel-reset'
+                          onClick={resetFilters}
                         >
-                          {ticketId}
+                          Reset filters
+                        </LwButton>
+                      </span>
+                    )}
+                  </span>
+                  <FilterSidePanel id='beacon-filter-panel'>
+                    <FilterSidePanelCategory
+                      title='Severity'
+                      showAll={!!showAllCategories.severity}
+                      onShowAllToggle={() => toggleShowAllCategory('severity')}
+                    >
+                      {SEVERITIES.map((sev) => (
+                        <FilterSidePanelCategoryItem
+                          key={sev}
+                          checked={selectedSeverities.has(sev)}
+                          onClick={() => toggleSeverity(sev)}
+                        >
+                          {sev}
                         </FilterSidePanelCategoryItem>
                       ))}
                     </FilterSidePanelCategory>
-                  )}
 
-                  <FilterSidePanelCategory title='Flags'>
-                    <FilterSidePanelCategoryItem
-                      checked={showDuplicates}
-                      onClick={() => setShowDuplicates(!showDuplicates)}
+                    <FilterSidePanelCategory
+                      title='Status'
+                      showAll={!!showAllCategories.pipeline}
+                      onShowAllToggle={() => toggleShowAllCategory('pipeline')}
                     >
-                      Duplicates
-                    </FilterSidePanelCategoryItem>
-                  </FilterSidePanelCategory>
-                </FilterSidePanel>
-              </FlexItem>
+                      {FILTER_STATUSES.map((status) => (
+                        <FilterSidePanelCategoryItem
+                          key={status}
+                          checked={selectedStatuses.has(status)}
+                          onClick={() => toggleStatus(status)}
+                        >
+                          {statusLabel(status)}
+                        </FilterSidePanelCategoryItem>
+                      ))}
+                    </FilterSidePanelCategory>
+
+                    {ltwlsuptTicketIds.length > 0 && (
+                      <FilterSidePanelCategory
+                        title='LTWLSUPT_TICKET'
+                        showAll={!!showAllCategories.ltwlsuptTicket}
+                        onShowAllToggle={() => toggleShowAllCategory('ltwlsuptTicket')}
+                      >
+                        {ltwlsuptTicketIds.map((ticketId) => (
+                          <FilterSidePanelCategoryItem
+                            key={ticketId}
+                            checked={selectedLtwlsuptTickets.has(ticketId)}
+                            onClick={() => toggleLtwlsuptTicket(ticketId)}
+                          >
+                            {ticketId}
+                          </FilterSidePanelCategoryItem>
+                        ))}
+                      </FilterSidePanelCategory>
+                    )}
+
+                    <FilterSidePanelCategory title='Flags'>
+                      <FilterSidePanelCategoryItem
+                        checked={showDuplicates}
+                        onClick={() => setShowDuplicates(!showDuplicates)}
+                      >
+                        Duplicates
+                      </FilterSidePanelCategoryItem>
+                    </FilterSidePanelCategory>
+                  </FilterSidePanel>
+                </FlexItem>
+              )}
               <FlexItem flex={{ default: 'flex_1' }} className='lightwell-beacon-table-area'>
                 {selectedCustomerId && !isLoading ? (
                   <VulnerabilityTable
@@ -576,6 +585,7 @@ const Beacon = () => {
                     onResetFilters={resetFilters}
                     columns={columns}
                     onColumnsChange={setColumns}
+                    isTrueEmpty={isTrueEmpty}
                   />
                 ) : selectedCustomerId ? (
                   <LwSkeleton height='400px' />
