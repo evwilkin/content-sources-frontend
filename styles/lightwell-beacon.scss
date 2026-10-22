@@ -156,8 +156,21 @@
   margin-bottom: var(--pf-t--global--spacer--md);
 }
 
+.lightwell-filter-panel-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--pf-t--global--spacer--sm);
+}
+
 .lightwell-filter-count {
   color: var(--pf-t--global--text--color--link--default);
+}
+
+/* Beats PF's `:is(.pf-v6-c-content--small, .pf-v6-c-content small):not(:last-child)`
+ * (specificity 0,2,1), which otherwise re-applies margin-block-end once this
+ * label is no longer the last child in the header (Reset filters button follows it). */
+.lightwell-filter-panel-header .lightwell-filter-panel-header-actions .lightwell-filter-count {
+  margin-block-end: 0;
 }
 
 /* Vulnerability table */
